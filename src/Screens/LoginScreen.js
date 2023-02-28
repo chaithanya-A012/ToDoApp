@@ -1,4 +1,4 @@
-import {StyleSheet, SafeAreaView, TextInput, Text, Button, TouchableOpacity} from 'react-native';
+import {StyleSheet, SafeAreaView, TextInput, Text, TouchableOpacity} from 'react-native';
 import {useState} from 'react';
 
 
@@ -29,7 +29,7 @@ const LoginScreen = props => {
         title="LOGIN"
         onPress={() => {
           console.log('cliked login');
-          props.navigation.navigate('Homescreen');
+          props.navigation.navigate('HomeScreen');
         }}><Text style={styles.Btn}>LOGIN</Text>
       </TouchableOpacity>
     </SafeAreaView>
@@ -60,7 +60,6 @@ const styles = StyleSheet.create({
     color: 'white',
     alignItems: 'center',
     backgroundColor: 'blue',
-    // width: 100,
     borderRadius: 10,
     marginTop:10,
     padding: 10,

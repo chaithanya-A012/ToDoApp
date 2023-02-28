@@ -1,32 +1,39 @@
 import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import LoginScreen from './src/Screens/LoginScreen';
-import Homescreen from './src/Screens/Homescreen';
 import IonIcon from 'react-native-vector-icons/Ionicons';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {View, StyleSheet, Image} from 'react-native';
-import Addnotes from './src/Screens/Addnotes';
-import DoneScreen from './src/Screens/DoneScreen';
+import { Provider } from 'react-redux';
+import {store} from './src/store';
+import LoginScreen from './src/screens/LoginScreen';
+import HomeScreen from './src/screens/HomeScreen';
+import AddTodo from './src/screens/AddTodo';
+import ListTodo from './src/screens/ListTodo';
+
 
 const Stack = createNativeStackNavigator();
 
-const MyStack = () => {
+const App = () => {
   return (
-    <NavigationContainer>
-      <Stack.Navigator
-        screenOptions={{headerTitleAlign: 'center'}}
-        initialRouteName="LoginScreen">
-        <Stack.Screen name="LoginScreen" component={LoginScreen} />
-        <Stack.Screen
-          name="Homescreen"
-          component={Homescreen}
-          options={headerStyle}
-        />
-        <Stack.Screen name="Addnotes" component={Addnotes} />
-        <Stack.Screen name="DoneScreen" component={DoneScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <Provider store={store}>
+      <NavigationContainer>
+        <Stack.Navigator
+          screenOptions={{headerTitleAlign: 'center'}}
+          initialRouteName="LoginScreen">
+          <Stack.Screen name="LoginScreen" component={LoginScreen} />
+          <Stack.Screen
+            name="HomeScreen"
+            component={HomeScreen}
+            options={headerStyle}
+          />
+           <Stack.Screen name="AddTodo" component={AddTodo} />
+          <Stack.Screen name="ListTodo" component={ListTodo} />
+          
+        </Stack.Navigator>
+        
+      </NavigationContainer>
+    </Provider>
   );
 };
 
@@ -34,7 +41,7 @@ const headerStyle = {
   title: 'Get this stuff done',
   headerStyle: {backgroundColor: '#fafcfe'},
   headerTitleStyle: {color: '#48494b'},
-  headerTitleAlign: {marginRight:50},
+  headerTitleAlign: {marginRight: 50},
   headerLeft: () => (
     <View style={styles.iconContainer}>
       <IonIcon
@@ -46,7 +53,7 @@ const headerStyle = {
         }}
       />
       <Image
-        source={require('./assets/Images/dart.png')}
+        source={require('./src/assets/Images/dart.png')}
         style={styles.Image}
         size={25}
       />
@@ -90,22 +97,16 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
   },
   iconContainer: {
-    // backgroundColor:'red',
     flexDirection: 'row',
     justifyContent: 'space-around',
     width: 100,
-    marginTop:10,
-
+    marginTop: 10,
   },
   Image: {
     width: 38,
     height: 28,
-    // marginLeft : 10,
     marginRight: 30,
-    // paddingLeft:5,
-    marginLeft:10,
-  
-    // backgroundColor:'pink'
+    marginLeft: 10,
   },
 });
-export default MyStack;
+export default App;

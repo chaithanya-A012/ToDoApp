@@ -3,37 +3,29 @@ import {
   Text,
   StyleSheet,
   Image,
-  ScrollView,
   TouchableOpacity,
   FlatList,
   Dimensions,
-  DeviceEventEmitter,
 } from 'react-native';
-import React from 'react';
+import React, {useEffect} from 'react';
 import {FloatingAction} from 'react-native-floating-action';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
-import {EventEmitter} from 'react-native/Libraries/vendor/emitter/EventEmitter';
-import {NativeEventEmitter} from 'react-native/Libraries/EventEmitter/NativeEventEmitter';
+import {useSelector} from 'react-redux';
 
 const deviceHeight = Dimensions.get('window').height;
-const deviceWidth = Dimensions.get('window').width;
 
-const Homescreen = props => {
+const HomeScreen = props => {
   const [todoItems, setTodoItems] = React.useState([]);
   const [refresh, setRefresh] = React.useState(true);
 
-  const Datahandler = arg => {
-    console.log('Received Data ', arg);
-    updateToDoList(arg);
-  };
-  DeviceEventEmitter.addListener('got-data', Datahandler);
+  const todoList = useSelector(state => state.todo);
 
-  const updateToDoList = newtodo => {
-    // console.log("updateToDoList", newtodo)
-    let a = [];
-    a = [].concat(todoItems, {...newtodo, id: todoItems.length + 1});
-    setTodoItems(a);
-  };
+  console.log('todo list from slice home screen', todoList.todoList);
+
+  useEffect(() => {
+    console.log('todoItemsnew', todoList);
+    setTodoItems(todoList.todoList);
+  }, [todoList]);
 
   const updatedTodo = val => {
     objIndex = todoItems.findIndex(obj => obj.id == val.id);
@@ -45,10 +37,9 @@ const Homescreen = props => {
     //Log object to console again.
     setRefresh(!refresh);
   };
-
   console.log('updatedTodo', updatedTodo);
 
-  //------------------------------new-------------------------------------------------------------
+  //------------------------------subtasks---------------------------------------------------------
 
   const subtaskupdatedTodo = value => {
     console.log('value', value);
@@ -57,7 +48,7 @@ const Homescreen = props => {
       for (let j of i.subTasks) {
         console.log('second loop', j);
         if (j.subid === value.subid) {
-          j.subTaskCompleted = !value.subTaskcompleted;
+          j.subTaskCompleted = !value.subTaskCompleted;
           setRefresh(!refresh);
         }
       }
@@ -66,151 +57,83 @@ const Homescreen = props => {
     console.log('updated list final ', todoItems);
   };
 
-  return (
-    <View style={[styles.container, {flexDirection: 'column'}]}>
-      {console.log(
-        '----------------------------- todoItems -------------------- \n ',
-        JSON.stringify(todoItems),
-      )}
-      {console.log(
-        '----------------------------- todoItems.subTasks -------------------- \n ',
-        JSON.stringify(todoItems.subTasks),
-      )}
+  {
+    console.log(
+      '----------------------------- todoItems -------------------- \n ',
+      JSON.stringify(todoItems),
+    );
+  }
+  {
+    console.log(
+      '----------------------------- todoItems.subTasks -------------------- \n ',
+      JSON.stringify(todoItems.subTasks),
+    );
+  }
 
-      <View style={{flex: 1, backgroundColor: 'blue'}} />
+  return (
+    <View style={styles.maincontainer}>
+      <View style={styles.container} />
       <View>
         <Image
-          source={require('../../assets/Images/dart.png')}
+          source={require('../assets/Images/dart.png')}
           style={styles.Image1}
         />
-        <Text
-          style={{
-            color: 'black',
-            fontSize: 38,
-            fontWeight: 'bold',
-            textAlign: 'left',
-            // paddingLeft:15,
-            bottom: 30,
-            position:'relative',
-            left:15,
-            fontFamily: "Open Sans"
-          }}>
-          Get this stuff done
-        </Text>
+        <Text style={styles.header}>Get this stuff done</Text>
 
         {/* ----------------------Finish by end of week--------------------------- */}
-
         <View>
-          <Text style={{color: '#000', fontSize: 22, fontWeight: 'bold', paddingLeft:15}}>
-            Finish by end of week
-          </Text>
-        
+          <Text style={styles.Heading1}>Finish by end of week</Text>
           <FlatList
             data={todoItems}
             horizontal={false}
+            keyExtractor={item => item.id}
             renderItem={({item}) => {
-              // console.log('item_newtodo_list',JSON.stringify(item));
               return (
-                <View style={{justifyContent: 'space-between'}}>
-                  <TouchableOpacity style={{flexDirection: 'row'}}>
+                <View style={styles.listConatiner}>
+                  <TouchableOpacity style={styles.touchable}>
                     <BouncyCheckbox
                       isChecked={item.completed}
                       fillColor="blue"
                       onPress={() => updatedTodo(item)}
                     />
-                    <Text
-                      style={{
-                        color: '#000',
-                        fontSize: 22,
-                        // padding:5,
-                        // backgroundColor: 'rgb(220,220,220)',
-                        // borderRadius: 10,
-                        // paddingHorizontal: 10,
-                        // marginVertical: 10,
-                        width: '90%',
-                        // textDecorationLine: item.completed
-                        //   ? 'line-through'
-                        //   : 'none',
-                      }}>
-                      {item.title}
-                    </Text>
+                    <Text style={styles.title}>{item.title}</Text>
                   </TouchableOpacity>
 
-                  <Text  style={{
-                        color: '#000',
-                        fontSize: 16,
-                        marginLeft:26,
-                        // backgroundColor: 'rgb(220,220,220)',
-                        // borderRadius: 10,
-                        // paddingHorizontal: 10,
-                        // marginVertical: 10,
-                        // width: '90%',
-                      
-                      }} >{item.description}</Text>
+                  <Text style={styles.description}>{item.description}</Text>
 
-                  {/* Sub Task Data */}
-
-                  <FlatList
-                    data={item.subTasks}
-                    horizontal={false}
-                    renderItem={({item}) => {
+                  <View style={styles.dimensions}>
+                    {item.subTasks.map(item => {
+                      console.log('SUbtasks', item);
                       return (
-                        <View style={{justifyContent: 'space-between'}}>
-                          <TouchableOpacity style={{flexDirection: 'row'}}>
-                            <BouncyCheckbox
-                              isChecked={item.subTaskcompleted}
-                              // filterColor="red"
-                              fillColor="blue"
-                              unfillColor="#ffffff"
-                              // iconstyle={{borderColor:"blue"}}
-                              onPress={() => subtaskupdatedTodo(item)}
-                            />
-                            <Text style={{ fontSize: 22,color:'black'}}>{item.subTaskTitle}</Text>
-                          </TouchableOpacity>
-                          <Text style={{ color:'black'}}>{item.subTaskDescription}</Text>
-                        </View>
+                        <React.Fragment key={item.subid}>
+                          <View style={styles.listConatiner}>
+                            <TouchableOpacity style={styles.touchable}>
+                              <BouncyCheckbox
+                                isChecked={item.subTaskCompleted}
+                                fillColor="blue"
+                                unfillColor="#ffffff"
+                                onPress={() => subtaskupdatedTodo(item)}
+                              />
+                              <Text style={styles.title}>
+                                {item.subTaskTitle}
+                              </Text>
+                            </TouchableOpacity>
+                            <Text style={styles.description}>
+                              {item.subTaskDescription}
+                            </Text>
+                          </View>
+                        </React.Fragment>
                       );
-                    }}
-                    style={{height: deviceHeight * 0.2,marginLeft:33}}
-                  />
-
-                  {/* <FlatList
-                    data={item.subTasks}
-                    horizontal={false}
-                    renderItem={({item}) => {
-                      return (
-                        <View style={{justifyContent: 'space-between'}}>
-                          <Text>{item.subTaskTitle}</Text>
-                          <Text>{item.subTaskDescription}</Text>
-                        </View>
-                      );
-                    }}
-                    // style={{height: deviceHeight * 0.2}}
-                  /> */}
+                    })}
+                  </View>
                 </View>
               );
             }}
-            style={{height: deviceHeight * 0.2,backgroundColor: '#fff',
-            padding: 10,
-            fontSize: 22,
-            width: '100%',
-            marginTop: 15,
-            // marginLeft:20,
-            color: '#000',
-            borderRadius: 10,}}
+            style={styles.flatview}
           />
 
           {/* ------------------------finish end of day------------------------------ */}
-          <Text
-            style={{
-              color: '#000',
-              fontSize: 20,
-              fontWeight: 'bold',
-              marginLeft:10,
-              paddingLeft:5,
-            }}>
-            Finish by end of day
-          </Text>
+          <Text style={styles.Heading1}>Finish by end of day</Text>
 
           <FlatList
             data={todoItems}
@@ -224,17 +147,14 @@ const Homescreen = props => {
                     <TouchableOpacity style={{flexDirection: 'row'}}>
                       <BouncyCheckbox
                         isChecked={item.completed}
-                        // filterColor="blue"
                         fillColor="blue"
                         unfillColor="#ffffff"
-
                         onPress={() => updatedTodo(item)}
                       />
                       <Text
                         style={{
                           color: '#000',
                           fontSize: 16,
-                          // width: '90%',
                           textDecorationLine: item.completed
                             ? 'line-through'
                             : 'none',
@@ -243,7 +163,6 @@ const Homescreen = props => {
                       </Text>
                     </TouchableOpacity>
                   )}
-                  {/* <Text>{item.title}</Text> */}
                   {item.completed && (
                     <Text
                       style={{
@@ -254,84 +173,60 @@ const Homescreen = props => {
                       {item.description}
                     </Text>
                   )}
-
-                  <FlatList
-                    data={item.subTasks}
-                    horizontal={false}
-                    keyExtractor={item => item.subid}
-                    renderItem={({item}) => {
-                      console.log('item',item);
+                   <View style={styles.dimensions}>
+                    {item.subTasks.map(item => {
                       return (
-                        <View style={{justifyContent: 'space-between'}}>
-                          {item.subTaskCompleted && (
-                            <TouchableOpacity style={{flexDirection: 'row'}}>
-                              <BouncyCheckbox
-                                isChecked={item.subTaskCompleted}
-                                // filterColor="red"
-                                fillColor="blue"
-                                unfillColor="#ffffff"
-                                // iconstyle={{borderColor:"blue"}}
-                                onPress={() => subtaskupdatedTodo(item)}
-                              />
+                        <React.Fragment key={item.subid}>
+                          <View style={{justifyContent: 'space-between'}}>
+                            {item.subTaskCompleted && (
+                              <TouchableOpacity style={{flexDirection: 'row'}}>
+                                <BouncyCheckbox
+                                  isChecked={item.subTaskCompleted}
+                                  // filterColor="blue"
+                                  fillColor="blue"
+                                  unfillColor="#ffffff"
+                                  onPress={() => subtaskupdatedTodo(item)}
+                                />
+                                <Text
+                                  style={{
+                                    color: '#000',
+                                    fontSize: 16,
+                                    textDecorationLine: item.subTaskCompleted
+                                      ? 'line-through'
+                                      : 'none',
+                                  }}>
+                                  {item.subTaskTitle}
+                                </Text>
+                              </TouchableOpacity>
+                            )}
+
+                            {item.subTaskCompleted && (
                               <Text
                                 style={{
-                                  color: '#000',
-                                  fontSize: 16,
-                                  // width: '90%',
                                   textDecorationLine: item.subTaskCompleted
                                     ? 'line-through'
                                     : 'none',
                                 }}>
-                                  {item.subTaskTitle}
+                                {item.subTaskDescription}
                               </Text>
-                            </TouchableOpacity>
-                          )}
-                          {item.subTaskCompleted && (
-                            <Text style={{
-                              color: '#000',
-                              fontSize: 16,
-                              // width: '90%',
-                              textDecorationLine: item.subTaskCompleted
-                                ? 'line-through'
-                                : 'none',
-                            }}>
-                            {item.subTaskDescription}</Text>
-                          )}
-                        </View>
+                            )}
+                          </View>
+                        </React.Fragment>
                       );
-                    }}
-                    style={{height: deviceHeight * 0.2,marginLeft:33}}
-                    // style={{height: deviceHeight * 0.2}}
-                  />
+                    })}
+                  </View> 
                 </View>
               );
             }}
             extraData={refresh}
-            style={{height: deviceHeight * 0.25,backgroundColor: '#fff',
-            padding: 10,
-            width: '100%',
-            marginTop: 15,
-            // marginLeft:20,
-            color: '#000',
-            borderRadius: 10,}}
+            style={styles.flatview}
           />
-          {/* </ScrollView> */}
         </View>
-        <View
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}>
+        <View style={styles.actionbtn}>
           <FloatingAction
             onPressMain={() => {
-              props.navigation.navigate('Addnotes', {
-                // updateToDoList: updateToDoList,
-                todoList: todoItems,
-              });
+              props.navigation.navigate('AddTodo');
             }}
-            
           />
         </View>
       </View>
@@ -340,21 +235,80 @@ const Homescreen = props => {
 };
 
 const styles = StyleSheet.create({
+  maincontainer: {
+    flex: 1,
+    backgroundColor: 'white',
+    flexDirection: 'column',
+  },
   container: {
     flex: 1,
-    backgroundColor:'white'
+    backgroundColor: 'blue',
   },
   Image1: {
     width: 70,
     height: 70,
     marginLeft: 10,
     marginRight: 20,
-    // padding:20,
-    // marginTop:60,
-    backgroundColor: '#FFF',
+    backgroundColor: '#ffffff',
     borderRadius: 50,
     top: -40,
   },
+  header: {
+    color: 'black',
+    fontSize: 38,
+    fontWeight: 'bold',
+    textAlign: 'left',
+    bottom: 30,
+    position: 'relative',
+    left: 15,
+    fontFamily: 'Open Sans',
+  },
+
+  Heading1: {
+    color: '#000',
+    fontSize: 22,
+    fontWeight: 'bold',
+    paddingLeft: 15,
+  },
+
+  title: {
+    color: '#000',
+    fontSize: 22,
+    width: '90%',
+  },
+
+  description: {
+    color: '#000',
+    fontSize: 16,
+    marginLeft: 26,
+  },
+
+  dimensions: {
+    height: deviceHeight * 0.2,
+    marginLeft: 33,
+  },
+  listConatiner: {
+    justifyContent: 'space-between',
+  },
+  touchable: {
+    flexDirection: 'row',
+  },
+  flatview: {
+    height: deviceHeight * 0.2,
+    backgroundColor: '#ffffff',
+    padding: 10,
+    fontSize: 22,
+    width: '100%',
+    marginTop: 15,
+    color: '#000',
+    borderRadius: 10,
+  },
+  actionbtn: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
 
-export default Homescreen;
+export default HomeScreen;
